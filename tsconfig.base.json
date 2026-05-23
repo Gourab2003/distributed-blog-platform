@@ -1,0 +1,42 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+
+    "lib": ["ES2022"],
+
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+
+    "baseUrl": ".",
+
+    "paths": {
+      "@platform/auth": ["packages/auth/src/index.ts"],
+      "@platform/configuration": ["packages/configuration/src/index.ts"],
+      "@platform/contracts": ["packages/contracts/src/index.ts"],
+      "@platform/database": ["packages/database/src/index.ts"],
+      "@platform/errors": ["packages/errors/src/index.ts"],
+      "@platform/logger": ["packages/logger/src/index.ts"],
+      "@platform/messaging": ["packages/messaging/src/index.ts"],
+      "@platform/observability": ["packages/observability/src/index.ts"],
+      "@platform/redis": ["packages/redis/src/index.ts"],
+      "@platform/shared-kernel": ["packages/shared-kernel/src/index.ts"],
+      "@platform/validation": ["packages/validation/src/index.ts"]
+    }
+  }
+}
