@@ -238,6 +238,16 @@ importers:
         specifier: ^5.3.3
         version: 5.9.3
 
+  packages/errors:
+    dependencies:
+      '@platform/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+    devDependencies:
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
 packages:
 
   '@eslint-community/eslint-utils@4.9.1':

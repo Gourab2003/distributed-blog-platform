@@ -24,7 +24,8 @@
     "sourceMap": true,
 
     "baseUrl": ".",
-
+    "ignoreDeprecations": "5.0",
+    
     "paths": {
       "@platform/auth": ["packages/auth/src/index.ts"],
       "@platform/configuration": ["packages/configuration/src/index.ts"],
