@@ -1,0 +1,28 @@
+{
+  "name": "@platform/configuration",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint src/",
+    "clean": "rm -rf dist .tsbuildinfo"
+  },
+  "dependencies": {
+    "@platform/errors": "workspace:*",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}
