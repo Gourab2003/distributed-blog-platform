@@ -10,8 +10,8 @@ export abstract class PlatformError extends Error {
 
     protected constructor(params: {
         message: string;
-        retryable?: boolean;
-        severity?: ErrorSeverity;
+        severity: ErrorSeverity;
+        retryable: boolean;
         context?: Record<string, unknown>;
         cause?: Error;
     }) {
@@ -19,12 +19,26 @@ export abstract class PlatformError extends Error {
 
         this.name = this.constructor.name;
 
-        this.retryable = params.retryable ?? false;
-        this.severity = params.severity ?? 'medium';
+        this.retryable = params.retryable;
+        this.severity = params.severity;
         this.context = params.context;
 
         if (params.cause) {
             this.cause = params.cause;
         }
+
+        Object.setPrototypeOf(this, new.target.prototype);
+    }
+
+    toJSON() {
+        return {
+            name: this.name,
+            message: this.message,
+            code: this.code,
+            retryable: this.retryable,
+            severity: this.severity,
+            context: this.context,
+            stack: this.stack,
+        };
     }
 }
