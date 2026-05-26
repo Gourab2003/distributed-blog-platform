@@ -1,0 +1,17 @@
+{
+  "name": "@platform/http",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@platform/errors": "workspace:*",
+    "@platform/logger": "workspace:*",
+    "hono": "^4.12.23"
+  }
+}
