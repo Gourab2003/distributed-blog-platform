@@ -10,5 +10,10 @@
   },
 
   "include": ["src/**/*.ts"],
-  "exclude": ["dist", "node_modules"]
+  "exclude": ["dist", "node_modules"],
+  "references": [
+    { "path": "../../packages/configuration" },
+    { "path": "../../packages/errors" },
+    { "path": "../../packages/contracts" }
+  ]
 }

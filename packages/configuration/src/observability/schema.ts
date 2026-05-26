@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const observabilitySchema = z.object({
     enabled: z.boolean().default(true),
     serviceName: z.string().min(1),
-    sampleRate: z.number().min(0).max(1).default(1.0),
+    sampleRate: z.coerce.number().min(0).max(1).default(1),
     totelExporterUrl: z.string().url().optional(),
 }).strict();
 

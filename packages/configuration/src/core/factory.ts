@@ -1,82 +1,86 @@
 import { z } from 'zod';
-
 import { deepFreeze } from './deep-freeze.js';
 import { mergeConfigurationSchema } from './schema.js';
 import { ConfigurationValidationError } from './errors.js';
 
-type CreateServiceConfigurationOptions<
-    T extends z.AnyZodObject,
-> = {
+type CreateServiceConfigurationOptions<T extends z.AnyZodObject> = {
     service: string;
     schema: T;
 };
 
-/**
- * Transforms flat environment variables (e.g. logging.level) into nested structure
- * Required because dotenv loads everything flat, but our schemas are nested.
- */
-
 const transformEnvironmentVariables = (env: NodeJS.ProcessEnv): Record<string, unknown> => {
     const result: Record<string, unknown> = {};
 
-    for (const [key, value] of Object.entries(env)) {
-        if (value === undefined) continue;
+    for (const [key, rawValue] of Object.entries(env)) {
+        if (rawValue === undefined || rawValue === '') continue;
+
+        // Only accept our configuration keys (top-level or dotted)
+        if (!key.includes('.') && key !== 'environment' && key !== 'service') {
+            continue;
+        }
 
         const parts = key.split('.');
-        let current = result;
+        let current: Record<string, unknown> = result;
 
         for (let i = 0; i < parts.length - 1; i++) {
-            const part: any = parts[i];
-            if (!current[part]) {
+            const part:any = parts[i];
+            if (!(part in current) || typeof current[part] !== 'object' || current[part] === null) {
                 current[part] = {};
             }
-            current = current[part] as Record<string, undefined>;
+            current = current[part] as Record<string, unknown>;
         }
-        const finalKey: any = parts[parts.length - 1];
-        current[finalKey] = value;
+
+        const finalKey = parts.at(-1);
+        if(!finalKey){
+            continue;
+        }
+        const value = rawValue.trim();
+
+        // Smart type coercion
+        if (value === 'true') {
+            current[finalKey] = true;
+        } else if (value === 'false') {
+            current[finalKey] = false;
+        } else {
+            current[finalKey] = value;
+        }
     }
+
     return result;
-}
+};
 
-
-export const createServiceConfiguration = <
-    T extends z.AnyZodObject,
->({
+export const createServiceConfiguration = <T extends z.AnyZodObject>({
     service,
     schema,
 }: CreateServiceConfigurationOptions<T>) => {
     const rawEnvironment = process.env;
-    const transformedEnv = transformEnvironmentVariables(rawEnvironment)
-    const mergedSchema =
-        mergeConfigurationSchema(schema);
+    const transformedEnv = transformEnvironmentVariables(rawEnvironment);
 
-    const result =
-        mergedSchema.safeParse(transformedEnv);
+    // console.dir(transformedEnv, { depth: null });
+
+    const mergedSchema = mergeConfigurationSchema(schema);
+
+    const result = mergedSchema.safeParse(transformedEnv);
 
     if (!result.success) {
         throw new ConfigurationValidationError(
             'Configuration validation failed',
             service,
-            rawEnvironment.NODE_ENV ||
-            'unknown',
+            rawEnvironment.NODE_ENV || 'unknown',
             result.error.issues,
         );
     }
 
-    const configuration = { ...result.data };
+    const config = { ...result.data };
 
-    if (configuration.secrets) {
-        Object.defineProperty(
-            configuration,
-            'secrets',
-            {
-                value: configuration.secrets,
-                writable: false,
-                configurable: false,
-                enumerable: false,
-            },
-        );
+    if (config.secrets) {
+        Object.defineProperty(config, 'secrets', {
+            value: config.secrets,
+            writable: false,
+            configurable: false,
+            enumerable: false,
+        });
     }
 
-    return deepFreeze(configuration) as z.infer<T> & { secrets: any }
+    return deepFreeze(config) as z.infer<typeof mergedSchema>;
 };
