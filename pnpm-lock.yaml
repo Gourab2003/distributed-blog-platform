@@ -234,6 +234,9 @@ importers:
 
   apps/auth-service:
     dependencies:
+      '@hono/node-server':
+        specifier: ^1.13.7
+        version: 1.19.14(hono@4.12.23)
       '@platform/configuration':
         specifier: workspace:*
         version: link:../../packages/configuration
@@ -243,11 +246,23 @@ importers:
       '@platform/errors':
         specifier: workspace:*
         version: link:../../packages/errors
+      '@platform/http':
+        specifier: workspace:*
+        version: link:../../packages/http
+      '@platform/logger':
+        specifier: workspace:*
+        version: link:../../packages/logger
+      '@platform/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
       dotenv:
         specifier: ^16.4.5
         version: 16.6.1
+      hono:
+        specifier: ^4.6.10
+        version: 4.12.23
       zod:
-        specifier: ^3.25.76
+        specifier: ^3.23.8
         version: 3.25.76
     devDependencies:
       '@types/node':
@@ -514,6 +529,12 @@ packages:
   '@eslint/plugin-kit@0.7.1':
     resolution: {integrity: sha512-rZAP3aVgB9ds9KOeUSL+zZ21hPmo8dh6fnIFwRQj5EAZl9gzR7wxYbYXYysAM8CTqGmUGyp2S4kUdV17MnGuWQ==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24}
+
+  '@hono/node-server@1.19.14':
+    resolution: {integrity: sha512-GwtvgtXxnWsucXvbQXkRgqksiH2Qed37H9xHZocE5sA3N8O8O8/8FA3uclQXxXVzc9XBZuEOMK7+r02FmSpHtw==}
+    engines: {node: '>=18.14.1'}
+    peerDependencies:
+      hono: ^4
 
   '@humanfs/core@0.19.2':
     resolution: {integrity: sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA==}
@@ -1151,6 +1172,10 @@ snapshots:
     dependencies:
       '@eslint/core': 1.2.1
       levn: 0.4.1
+
+  '@hono/node-server@1.19.14(hono@4.12.23)':
+    dependencies:
+      hono: 4.12.23
 
   '@humanfs/core@0.19.2':
     dependencies:

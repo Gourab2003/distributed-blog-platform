@@ -15,3 +15,7 @@ export type {
     LogPrimitive,
     LogValue,
 } from './types/index.js';
+
+export {
+    createLogger,
+} from './core/create-logger.js';
