@@ -314,6 +314,12 @@ importers:
         specifier: ^2.4.4
         version: 2.4.4
 
+  packages/observability:
+    dependencies:
+      '@platform/logger':
+        specifier: workspace:*
+        version: link:../logger
+
 packages:
 
   '@colors/colors@1.6.0':
