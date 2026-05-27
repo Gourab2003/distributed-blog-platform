@@ -5,7 +5,7 @@ import type { PlatformLogger } from '@platform/logger';
 import { serializeErrorResponse } from '../errors/serialize-error-response.js';
 
 import {
-    REQUEST_ID_CONTEXT_KEY,
+    RequestContextKeys,
 } from '../context/request-context-keys.js';
 
 interface ErrorHandlerOptions {
@@ -20,7 +20,7 @@ export const errorHandlerMiddleware = (
             await next();
         } catch (error) {
             const requestId = context.get(
-                REQUEST_ID_CONTEXT_KEY,
+                RequestContextKeys.REQUEST_ID,
             ) as string | undefined;
 
             options.logger.error(

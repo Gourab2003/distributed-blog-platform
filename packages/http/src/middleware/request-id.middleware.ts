@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import type { MiddlewareHandler } from 'hono';
 
 import {
-    REQUEST_ID_CONTEXT_KEY,
+    RequestContextKeys ,
 } from '../context/request-context-keys.js';
 
 const REQUEST_ID_HEADER = 'x-request-id';
@@ -17,7 +17,7 @@ export const requestIdMiddleware = (): MiddlewareHandler => {
             existingRequestId || randomUUID();
 
         context.set(
-            REQUEST_ID_CONTEXT_KEY,
+            RequestContextKeys.REQUEST_ID ,
             requestId,
         );
 
