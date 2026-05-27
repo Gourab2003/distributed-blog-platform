@@ -1,27 +1,37 @@
+import type { z } from 'zod';
+
+import type { environmentEnum } from './environment/schema.js';
+
+import type {
+    loggingSchema,
+} from './logging/schema.js';
+
+import type {
+    observabilitySchema,
+} from './observability/schema.js';
+
+import type {
+    databaseSchema,
+} from './database/schema.js';
+
+import type {
+    redisSchema,
+} from './redis/schema.js';
+
 export type Environment =
-    | 'development'
-    | 'test'
-    | 'staging'
-    | 'production';
+    z.infer<typeof environmentEnum>;
 
-export interface LoggingConfiguration {
-    readonly level: 'debug' | 'info' | 'warn' | 'error';
-    readonly format: 'json' | 'pretty';
-}
+export type LoggingConfiguration =
+    z.infer<typeof loggingSchema>;
 
-export interface ObservabilityConfiguration {
-    readonly enabled: boolean;
-    readonly serviceName: string;
-    readonly sampleRate: number;
-}
+export type ObservabilityConfiguration =
+    z.infer<typeof observabilitySchema>;
 
-export interface DatabaseConfiguration {
-    readonly url: string;
-}
+export type DatabaseConfiguration =
+    z.infer<typeof databaseSchema>;
 
-export interface RedisConfiguration {
-    readonly url: string;
-}
+export type RedisConfiguration =
+    z.infer<typeof redisSchema>;
 
 export interface SecretsConfiguration {
     readonly jwtSecret?: string;
