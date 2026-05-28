@@ -1,11 +1,32 @@
-import type { EventMetadata } from '../../metadata.js';
+import type { EntityId, ISODateString, BlogPostStatus } from '../../domain/index.js';
 
-export interface BlogPostCreatedEvent {
-    readonly metadata: EventMetadata;
-    readonly payload: {
-        readonly id: string;
-        readonly title: string;
-        readonly authorId: string;
-        readonly createdAt: string;
-    };
+export interface BlogPostCreatedEventPayload {
+    readonly id: EntityId;
+    readonly authorId: EntityId;
+    readonly slug: string;
+    readonly title: string;
+    readonly status: BlogPostStatus;
+    readonly createdAt: ISODateString;
+}
+
+export interface BlogPostUpdatedEventPayload {
+    readonly id: EntityId;
+    readonly authorId: EntityId;
+    readonly slug: string;
+    readonly title: string;
+    readonly status: BlogPostStatus;
+    readonly updatedAt: ISODateString;
+}
+
+export interface BlogPostPublishedEventPayload {
+    readonly id: EntityId;
+    readonly authorId: EntityId;
+    readonly slug: string;
+    readonly publishedAt: ISODateString;
+}
+
+export interface BlogPostDeletedEventPayload {
+    readonly id: EntityId;
+    readonly authorId: EntityId;
+    readonly deletedAt: ISODateString;
 }

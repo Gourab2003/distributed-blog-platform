@@ -1,2 +1,2 @@
-export type { UserCreatedEvent } from './user.js';
-export type { BlogPostCreatedEvent } from './blog.js';
+export * from './user.js';
+export * from './blog.js';

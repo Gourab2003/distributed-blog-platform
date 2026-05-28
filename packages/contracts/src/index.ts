@@ -1,5 +1,11 @@
-export * as ApiV1 from './api/v1/index.js';
-export * as EventsV1 from './events/v1/index.js';
+// Domain Foundations
+export * from './domain/index.js';
 
-export type { EventMetadata } from './metadata.js';
-export type { EntityId, ISODateString } from './domain/index.js';
+// Metadata Structures
+export * from './metadata.js';
+
+// Versioned API Transport Handshakes
+export * as ApiV1 from './api/v1/index.js';
+
+// Versioned Messaging Event Payloads
+export * as EventsV1 from './events/v1/index.js';
