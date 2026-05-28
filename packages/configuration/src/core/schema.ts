@@ -6,6 +6,7 @@ import { observabilitySchema } from '../observability/schema.js';
 import { databaseSchema } from '../database/schema.js';
 import { redisSchema } from '../redis/schema.js';
 import { secretsSchema } from '../secrets/schema.js';
+import { messagingSchema } from '../messaging/schema.js';
 
 export const baseConfigurationSchema =
     z.object({
@@ -21,14 +22,21 @@ export const baseConfigurationSchema =
             environmentSchema.shape
                 .runtime,
 
-        logging: loggingSchema,
+        logging:
+            loggingSchema,
 
         observability:
             observabilitySchema,
 
-        database: databaseSchema,
+        database:
+            databaseSchema,
 
-        redis: redisSchema,
+        redis:
+            redisSchema,
+
+        messaging:
+            messagingSchema,
+
     }).strict();
 
 export type BaseConfiguration =
@@ -42,7 +50,8 @@ export const mergeConfigurationSchema =
     ) => {
         return baseConfigurationSchema
             .extend({
-                secrets: secretsSchema,
+                secrets:
+                    secretsSchema,
 
                 ...serviceSchema.shape,
             })

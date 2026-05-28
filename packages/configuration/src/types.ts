@@ -18,6 +18,10 @@ import type {
     redisSchema,
 } from './redis/schema.js';
 
+import type {
+    messagingSchema
+} from './messaging/schema.js'
+
 export type Environment =
     z.infer<typeof environmentEnum>;
 
@@ -37,6 +41,9 @@ export interface SecretsConfiguration {
     readonly jwtSecret?: string;
 }
 
+export type MessagingConfiguration = 
+    z.infer<typeof messagingSchema>;
+
 export interface ServiceConfiguration {
     readonly service: string;
     readonly environment: Environment;
@@ -46,6 +53,8 @@ export interface ServiceConfiguration {
 
     readonly database: DatabaseConfiguration;
     readonly redis: RedisConfiguration;
+    readonly messaging: MessagingConfiguration
 
     readonly secrets: SecretsConfiguration;
+
 }

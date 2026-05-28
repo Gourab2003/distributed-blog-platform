@@ -9,6 +9,8 @@ export type {
     ObservabilityConfiguration,
     DatabaseConfiguration,
     RedisConfiguration,
+    MessagingConfiguration
+    
 } from './types.js';
 
 export {
@@ -28,3 +30,7 @@ export {
     ConfigurationError,
     ConfigurationValidationError,
 } from './core/errors.js';
+
+export {
+    messagingSchema
+} from './messaging/schema.js'
