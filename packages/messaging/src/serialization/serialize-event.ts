@@ -1,7 +1,7 @@
 import { InfrastructureError } from "@platform/errors";
 import { EventEnvelope } from "../types/event-envelope.js";
 
-export function SerializeEnevt(event: Omit<EventEnvelope, 'occurredAt'>) : Buffer {
+export function SerializeEvent(event: Omit<EventEnvelope, 'occurredAt'>) : Buffer {
     try {
         const fullEnvelope: EventEnvelope = {
             ...event,
