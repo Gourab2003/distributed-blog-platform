@@ -22,6 +22,7 @@
         "@platform/configuration": "workspace:*",
         "@platform/errors": "workspace:*",
         "@platform/logger": "workspace:*",
+        "@platform/runtime": "workspace:*",
         "ioredis": "^5.3.2"
     },
     "devDependencies": {

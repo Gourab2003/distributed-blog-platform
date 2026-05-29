@@ -24,7 +24,8 @@
         "@platform/configuration": "workspace:*",
         "@platform/errors": "workspace:*",
         "@platform/logger": "workspace:*",
-        "drizzle-orm": "^0.30.0",
+        "@platform/runtime": "workspace:*",
+        "drizzle-orm": "^0.29.3",
         "postgres": "^3.4.3"
     },
     "devDependencies": {

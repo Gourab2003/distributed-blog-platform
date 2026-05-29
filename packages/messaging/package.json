@@ -22,6 +22,7 @@
         "@platform/configuration": "workspace:*",
         "@platform/errors": "workspace:*",
         "@platform/logger": "workspace:*",
+        "@platform/runtime": "workspace:*",
         "amqplib": "^0.10.3"
     },
     "devDependencies": {

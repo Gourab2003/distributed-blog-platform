@@ -29,5 +29,8 @@
     {
       "path": "../errors",
     },
+    {
+      "path": "../runtime"
+    }
   ]
 }

@@ -45,11 +45,13 @@ export function createLifecycleManager(
           logger.error(
             `Fatal error during startup of ${ resource.name } `,
             {
-              error:
-                error instanceof Error
-                  ? error.message
-                  : String(error),
-            },
+              metadata: {
+                error:
+                  error instanceof Error
+                    ? error.message
+                    : String(error),
+              },
+            }
           );
 
           throw error;
@@ -91,11 +93,13 @@ export function createLifecycleManager(
           logger.error(
             `Failed to cleanly shutdown resource: ${ resource.name } `,
             {
-              error:
-                error instanceof Error
-                  ? error.message
-                  : String(error),
-            },
+              metadata: {
+                error:
+                  error instanceof Error
+                    ? error.message
+                    : String(error),
+              },
+            }
           );
         }
       }

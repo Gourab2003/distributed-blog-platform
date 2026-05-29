@@ -26,10 +26,13 @@ export function registerProcessSignals(
       logger.error(
         'Critical failure during shutdown orchestration',
         {
-          error:
-            error instanceof Error
-              ? error.message
-              : String(error),
+          metadata: {
+            error:
+              error instanceof Error
+                ? error.message
+                : String(error),
+          },
+
         },
       );
 

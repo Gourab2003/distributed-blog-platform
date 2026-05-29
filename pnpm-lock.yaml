@@ -330,9 +330,12 @@ importers:
       '@platform/logger':
         specifier: workspace:*
         version: link:../logger
+      '@platform/runtime':
+        specifier: workspace:*
+        version: link:../runtime
       drizzle-orm:
-        specifier: ^0.30.0
-        version: 0.30.10(postgres@3.4.9)
+        specifier: ^0.29.3
+        version: 0.29.5(postgres@3.4.9)
       postgres:
         specifier: ^3.4.3
         version: 3.4.9
@@ -390,6 +393,9 @@ importers:
       '@platform/logger':
         specifier: workspace:*
         version: link:../logger
+      '@platform/runtime':
+        specifier: workspace:*
+        version: link:../runtime
       amqplib:
         specifier: ^0.10.3
         version: 0.10.9
@@ -418,6 +424,9 @@ importers:
       '@platform/logger':
         specifier: workspace:*
         version: link:../logger
+      '@platform/runtime':
+        specifier: workspace:*
+        version: link:../runtime
       ioredis:
         specifier: ^5.3.2
         version: 5.11.0
@@ -1220,23 +1229,20 @@ packages:
     resolution: {integrity: sha512-fLTwcnLqtBxGd+51H/dEm9TC0FW6+cIX/RVPyNcitBO77X9+nkogEfMAJebpd/8Yl4KucmePHRYRWWvUlW0rqg==}
     hasBin: true
 
-  drizzle-orm@0.30.10:
-    resolution: {integrity: sha512-IRy/QmMWw9lAQHpwbUh1b8fcn27S/a9zMIzqea1WNOxK9/4EB8gIo+FZWLiPXzl2n9ixGSv8BhsLZiOppWEwBw==}
+  drizzle-orm@0.29.5:
+    resolution: {integrity: sha512-jS3+uyzTz4P0Y2CICx8FmRQ1eplURPaIMWDn/yq6k4ShRFj9V7vlJk67lSf2kyYPzQ60GkkNGXcJcwrxZ6QCRw==}
     peerDependencies:
       '@aws-sdk/client-rds-data': '>=3'
       '@cloudflare/workers-types': '>=3'
-      '@electric-sql/pglite': '>=0.1.1'
       '@libsql/client': '*'
       '@neondatabase/serverless': '>=0.1'
-      '@op-engineering/op-sqlite': '>=2'
       '@opentelemetry/api': ^1.4.1
       '@planetscale/database': '>=1'
       '@types/better-sqlite3': '*'
       '@types/pg': '*'
       '@types/react': '>=18'
       '@types/sql.js': '*'
-      '@vercel/postgres': '>=0.8.0'
-      '@xata.io/client': '*'
+      '@vercel/postgres': '*'
       better-sqlite3: '>=7'
       bun-types: '*'
       expo-sqlite: '>=13.2.0'
@@ -1253,13 +1259,9 @@ packages:
         optional: true
       '@cloudflare/workers-types':
         optional: true
-      '@electric-sql/pglite':
-        optional: true
       '@libsql/client':
         optional: true
       '@neondatabase/serverless':
-        optional: true
-      '@op-engineering/op-sqlite':
         optional: true
       '@opentelemetry/api':
         optional: true
@@ -1274,8 +1276,6 @@ packages:
       '@types/sql.js':
         optional: true
       '@vercel/postgres':
-        optional: true
-      '@xata.io/client':
         optional: true
       better-sqlite3:
         optional: true
@@ -2379,7 +2379,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.30.10(postgres@3.4.9):
+  drizzle-orm@0.29.5(postgres@3.4.9):
     optionalDependencies:
       postgres: 3.4.9
 

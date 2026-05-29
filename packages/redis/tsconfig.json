@@ -25,6 +25,12 @@
     },
     {
       "path": "../configuration"
+    },
+    {
+      "path": "../errors"
+    },
+    {
+      "path": "../runtime"
     }
   ]
 }
