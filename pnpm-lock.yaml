@@ -426,6 +426,16 @@ importers:
         specifier: ^5.3.3
         version: 5.9.3
 
+  packages/runtime:
+    dependencies:
+      '@platform/logger':
+        specifier: workspace:*
+        version: link:../logger
+    devDependencies:
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
   packages/shared-kernel:
     devDependencies:
       typescript:
