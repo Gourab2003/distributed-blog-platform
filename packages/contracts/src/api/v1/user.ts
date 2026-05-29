@@ -3,6 +3,7 @@ import type { EntityId, ISODateString, UserRole } from '../../domain/index.js';
 export interface CreateUserRequest {
     readonly email: string;
     readonly username: string;
+    readonly password: string;
 }
 
 export interface UpdateUserRequest {

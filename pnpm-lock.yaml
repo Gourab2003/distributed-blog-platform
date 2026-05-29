@@ -401,6 +401,12 @@ importers:
         specifier: ^5.3.3
         version: 5.9.3
 
+  packages/shared-kernel:
+    devDependencies:
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
 packages:
 
   '@colors/colors@1.6.0':
