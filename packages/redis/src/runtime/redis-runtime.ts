@@ -1,5 +1,5 @@
 import { InfrastructureError } from "@platform/errors";
-import { createRedisClinet } from "../client/redis-client.js";
+import { createRedisClient } from "../client/redis-client.js";
 import { RedisClient } from "../client/redis-client.js";
 import { RedisRuntimeOptions } from "../types/redis-options.js";    
 
@@ -14,7 +14,7 @@ export async function createRedisRuntime(options:RedisRuntimeOptions): Promise<R
     let client: RedisClient;
 
     try {
-        client = createRedisClinet(config);
+        client = createRedisClient(config);
         await client.connect();
         await client.ping();
         logger.info('Redis connection established');
@@ -30,9 +30,10 @@ export async function createRedisRuntime(options:RedisRuntimeOptions): Promise<R
             await client.quit();
             logger.info('Redis connection closed')
         } catch (error) {
-            logger.error('Error during redis connection shutdown'),{
-                error: error instanceof Error ? error.message : String(error),
-            }
+            throw new InfrastructureError(
+                'Error during redis connection shutdown',
+                { cause: error instanceof Error ? error.message : String(error) },
+            )
         }
     };
     return { client, shutdown }

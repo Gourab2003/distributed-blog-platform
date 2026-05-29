@@ -3,7 +3,7 @@ import { RedisConfiguration } from '@platform/configuration'
 
 export type RedisClient = Redis;
 
-export function createRedisClinet(config: RedisConfiguration): RedisClient{
+export function createRedisClient(config: RedisConfiguration): RedisClient {
     return new Redis(config.url, {
         maxRetriesPerRequest: 3,
         enableReadyCheck: true,
