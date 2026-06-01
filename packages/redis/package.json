@@ -9,6 +9,14 @@
         ".": {
             "import": "./dist/index.js",
             "types": "./dist/index.d.ts"
+        },
+        "./runtime": {
+            "import": "./dist/runtime/redis-runtime.js",
+            "types": "./dist/runtime/redis-runtime.d.ts"
+        },
+        "./client/redis-client.js": {
+            "import": "./dist/client/redis-client.js",
+            "types": "./dist/client/redis-client.d.ts"
         }
     },
     "scripts": {

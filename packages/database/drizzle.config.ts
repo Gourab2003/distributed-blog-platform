@@ -9,7 +9,7 @@ if (!databaseUrl) {
 }
 
 export default {
-    schema: './src/schema/**/**.table.ts',
+    schema: './dist/schema/**/**.table.js',
     out: './migrations',
     driver: 'pg',
     dbCredentials: {

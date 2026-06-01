@@ -9,6 +9,14 @@
         ".": {
             "import": "./dist/index.js",
             "types": "./dist/index.d.ts"
+        },
+        "./runtime": {
+            "import": "./dist/runtime/database-runtime.js",
+            "types": "./dist/runtime/database-runtime.d.ts"
+        },
+        "./schema": {
+            "import": "./dist/schema/index.js",
+            "types": "./dist/schema/index.d.ts"
         }
     },
     "scripts": {
@@ -16,9 +24,11 @@
         "dev": "tsc -p tsconfig.json --watch",
         "typecheck": "tsc -p tsconfig.json --noEmit",
         "lint": "eslint src/",
-        "clean": "rm -rf dist .tsbuildinfo",
-        "db:generate": "drizzle-kit generate",
-        "db:migrate": "drizzle-kit migrate"
+        "clean": "rm -rf dist .tsbuildinfo migrations/*",
+        "db:generate": "drizzle-kit generate:pg",
+        "db:migrate": "tsx src/migrations/migrate.ts",
+        "db:studio": "drizzle-kit studio",
+        "db:push": "drizzle-kit push"
     },
     "dependencies": {
         "@platform/configuration": "workspace:*",
@@ -30,6 +40,8 @@
     },
     "devDependencies": {
         "drizzle-kit": "^0.20.14",
-        "typescript": "^5.3.3"
+        "typescript": "^5.3.3",
+        "tsx": "^4.7.1",
+        "dotenv": "^16.4.5"
     }
 }

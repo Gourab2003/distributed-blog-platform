@@ -3,9 +3,7 @@ import type { RuntimeResource } from './runtime-resource.js';
 
 export interface LifecycleManager {
   readonly register: (resource: RuntimeResource) => void;
-
   readonly startAll: () => Promise<void>;
-
   readonly shutdownAll: () => Promise<void>;
 }
 
@@ -28,37 +26,78 @@ export function createLifecycleManager(
     async startAll(): Promise<void> {
       logger.info('Executing sequential startup orchestration...');
 
-      for (const resource of resources) {
-        if (!resource.start) {
-          continue;
-        }
+      const startedResources: RuntimeResource[] = [];
 
-        logger.info(`Starting resource: ${ resource.name }...`);
+      try {
+        for (const resource of resources) {
+          if (!resource.start) {
+            continue;
+          }
 
-        try {
+          if (resource.state === 'started') {
+            logger.warn(
+              `Resource already started: ${ resource.name } `,
+            );
+
+            continue;
+          }
+
+          logger.info(
+            `Starting resource: ${ resource.name }...`,
+          );
+
           await resource.start();
+
+          startedResources.push(resource);
 
           logger.info(
             `Resource startup complete: ${ resource.name } `,
           );
-        } catch (error) {
-          logger.error(
-            `Fatal error during startup of ${ resource.name } `,
-            {
-              metadata: {
-                error:
-                  error instanceof Error
-                    ? error.message
-                    : String(error),
-              },
-            }
-          );
-
-          throw error;
         }
-      }
 
-      logger.info('All resources started successfully.');
+        logger.info(
+          'All resources started successfully.',
+        );
+      } catch (error) {
+        logger.error(
+          'Startup orchestration failed. Beginning rollback...',
+          {
+            metadata: {
+              error:
+                error instanceof Error
+                  ? error.message
+                  : String(error),
+            },
+          },
+        );
+
+        const reverseStartedResources =
+          [...startedResources].reverse();
+
+        for (const resource of reverseStartedResources) {
+          try {
+            logger.info(
+              `Rolling back resource: ${ resource.name } `,
+            );
+
+            await resource.shutdown();
+          } catch (rollbackError) {
+            logger.error(
+              `Rollback failed for resource: ${ resource.name } `,
+              {
+                metadata: {
+                  error:
+                    rollbackError instanceof Error
+                      ? rollbackError.message
+                      : String(rollbackError),
+                },
+              },
+            );
+          }
+        }
+
+        throw error;
+      }
     },
 
     async shutdownAll(): Promise<void> {
@@ -76,10 +115,18 @@ export function createLifecycleManager(
         'Executing reverse-sequential graceful shutdown...',
       );
 
-      const reverseResources = [...resources].reverse();
+      const reverseResources =
+        [...resources].reverse();
 
       for (const resource of reverseResources) {
         try {
+          if (
+            resource.state !== 'started' &&
+            resource.state !== 'starting'
+          ) {
+            continue;
+          }
+
           logger.info(
             `Shutting down resource: ${ resource.name }...`,
           );
@@ -99,7 +146,7 @@ export function createLifecycleManager(
                     ? error.message
                     : String(error),
               },
-            }
+            },
           );
         }
       }

@@ -1,5 +1,7 @@
 {
   "name": "blog-server",
+  "private":"true",
+  "packageManager": "pnpm@11.2.2",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
