@@ -1,3 +1,5 @@
+import { OpenAPIHono } from '@hono/zod-openapi';
+import { swaggerUI } from '@hono/swagger-ui';
 import { Hono } from 'hono';
 import { createHttpRuntime as createPlatformHttpRuntime } from '@platform/http';
 import type { HttpVariables } from '@platform/http';
@@ -18,8 +20,8 @@ export interface HttpAppOptions {
     readonly logger: PlatformLogger;
 }
 
-export function createHttpApp(options: HttpAppOptions): Hono<{ Variables: AppVariables }> {
-    const app = new Hono<{ Variables: AppVariables }>();
+export function createHttpApp(options: HttpAppOptions): OpenAPIHono<{ Variables: AppVariables }> {
+    const app = new OpenAPIHono<{ Variables: AppVariables }>();
 
     app.use('*', async (c, next) => {
         c.set('getDb', () => options.dbRuntime.db);
@@ -32,6 +34,18 @@ export function createHttpApp(options: HttpAppOptions): Hono<{ Variables: AppVar
         logger: options.logger,
         serviceName: 'auth-service',
     });
+
+
+    app.doc('/openapi.json', {
+        openapi: '3.0.0',
+        info: {
+            title: 'Auth Service API',
+            version: '1.0.0',
+            description: 'Authentication and session management',
+        },
+    });
+
+    app.get('/docs', swaggerUI({ url: '/openapi.json' }));
 
     registerHealthRoutes(app as never);
     registerAuthRoutes(app as never);

@@ -20,7 +20,8 @@
     { "path": "../../packages/observability" },
     { "path": "../../packages/runtime" },
     { "path": "../../packages/validation"},
-    {"path": "../../packages/redis"},
-    {"path": "../../packages/database"},
+    { "path": "../../packages/redis"},
+    { "path": "../../packages/database"},
+    { "path": "../../packages/auth" }
   ]
 }

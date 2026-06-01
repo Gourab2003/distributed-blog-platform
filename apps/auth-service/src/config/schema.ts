@@ -8,6 +8,7 @@ export const authServiceSchema = z.object({
         accessTokenTtl: z.string().min(1),
         refreshTokenTtl: z.string().min(1),
     }).strict(),
+    
 }).strict();
 
 export type authServiceConfiguration = z.infer<typeof authServiceSchema>;

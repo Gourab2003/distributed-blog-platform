@@ -10,7 +10,8 @@ import { createHttpRuntime } from './runtime/http-runtime.js';
 
 async function main(): Promise<void> {
     const logger = createLogger(configuration.logging);
-    initObservability(configuration.observability);
+
+    initObservability({ ...configuration.observability, logger });
 
     try {
         const lifecycle = createLifecycleManager(logger);

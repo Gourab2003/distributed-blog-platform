@@ -8,6 +8,20 @@
       "when": 1780297219347,
       "tag": "0000_lovely_human_cannonball",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1780301159255,
+      "tag": "0001_fair_zombie",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1780310862980,
+      "tag": "0002_cuddly_jocasta",
+      "breakpoints": true
     }
   ]
 }

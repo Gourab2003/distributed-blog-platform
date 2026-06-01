@@ -8,3 +8,6 @@ export { timestamps } from './schema/shared/index.js'
 
 export * as userSchema from './schema/users/index.js';
 export * as sharedSchema from './schema/shared/index.js';
+
+export { refreshTokensTable } from './schema/auth/index.js';
+export type { RefreshTokenRecord, NewRefreshTokenRecord } from './schema/auth/index.js';

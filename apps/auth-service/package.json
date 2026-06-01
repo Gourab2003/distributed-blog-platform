@@ -22,11 +22,14 @@
     "@platform/database": "workspace:*",
     "@platform/validation": "workspace:*",
     "@platform/redis": "workspace:*",
+    "@platform/auth": "workspace:*",
     "drizzle-orm": "^0.29.3",
     "dotenv": "^16.4.5",
     "hono": "^4.6.10",
     "@hono/node-server": "^1.13.7",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "@hono/zod-openapi": "^0.9.5",
+    "@hono/swagger-ui": "^0.2.1"
   },
   "devDependencies": {
     "tsx": "^4.19.2",
