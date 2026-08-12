@@ -1,0 +1,15 @@
+# CURSOR & AI AGENT CONTEXT RULES
+
+# Always read context before editing code
+- Before touching any app or package, inspect the local `CONTEXT.md` in that directory as well as global files in `docs/context/`.
+- Maintain strict database table ownership as documented in `docs/context/DATABASE_SCHEMA_MATRIX.md`.
+- Enforce contract standards as documented in `docs/context/CONTRACTS_AND_EVENTS.md`.
+
+# Auto-update context documentation
+- Automatically update `CONTEXT.md` files upon modifying schemas, routes, contracts, or infrastructure logic.
+
+# Code Style Guidelines
+- Pure TypeScript, zero `any`.
+- Relative imports must use `.js` extension (e.g. `import { foo } from './foo.js'`).
+- Use Turborepo commands: `pnpm turbo run build`, `pnpm turbo run typecheck`, `pnpm turbo run lint`.
+- Package namespace: `@platform/<package-name>`.
