@@ -1,625 +1,147 @@
-# Enterprise Platform Backend 🚀
+# Monolithic Blogging Platform API Server 🚀
 
-Production-grade distributed backend platform engineered with strict TypeScript, pnpm workspaces, and Turborepo.
+A production-grade monolithic backend blogging API server engineered using TypeScript, Hono, Node.js, and Drizzle ORM. 
 
-This project demonstrates enterprise backend engineering patterns including:
-
-* Distributed service architecture
-* Contract-first API design
-* Runtime lifecycle orchestration
-* Typed infrastructure boundaries
-* Secure authentication flows
-* Structured observability
-* Event-driven messaging
-* Production-ready PostgreSQL + Redis integration
-
-> ⚠️ 
-> The codebase follows strict architectural and engineering standards intended for real-world backend systems.
+This repository has been simplified from a complex microservices architecture into a clean, high-performance monolith, reducing operational complexity while retaining strict type safety and structured design.
 
 ---
 
-# ✨ Core Architecture
+## ✨ Features & Architecture
 
-The platform uses a **microservice-oriented monorepo architecture** with strict package boundaries.
-
-## Stack
-
-| Layer          | Technology                       |
-| -------------- | -------------------------------- |
-| Language       | TypeScript                       |
-| Runtime        | Node.js                          |
-| Monorepo       | Turborepo + pnpm Workspaces      |
-| HTTP Framework | Hono                             |
-| API Contracts  | Zod + OpenAPI                    |
-| Database       | PostgreSQL                       |
-| ORM            | Drizzle ORM                      |
-| Cache          | Redis                            |
-| Messaging      | RabbitMQ                         |
-| Logging        | Winston                          |
-| Observability  | OpenTelemetry-ready abstractions |
+*   **HTTP Framework**: Built with [Hono](https://hono.dev/) for ultra-fast, lightweight HTTP routing.
+*   **Database & ORM**: Driven by [PostgreSQL](https://www.postgresql.org/) and mapped with [Drizzle ORM](https://orm.drizzle.team/), utilizing postgres-js client pooling.
+*   **Unified Schema**: Enforces real referential integrity (foreign keys and indexes) directly in the database.
+*   **SQL Joins**: Implements direct SQL joins for high-performance retrieval (e.g., retrieving blog posts and parent comments alongside user author profiles in a single query).
+*   **Stateless Authentication**: Features secure user registration, credentials verification via `bcryptjs`, stateless JWT access token verification, and rotatable, db-stored opaque refresh tokens.
+*   **Consolidated Input Validation**: Validates all incoming request payloads at the routing boundary using [Zod](https://zod.dev/) schemas.
+*   **Robust Logging & Middleware**: Automatically tracks request latency, injects UUID correlation headers, catches and serializes database/auth exceptions, and writes structured JSON logs directly to standard output/error.
 
 ---
 
-# 📦 Repository Structure
+## 📦 Project Layout
 
 ```txt
-apps/
-packages/
-infra/
+src/
+├── config.ts               # Zod-validated environment config variables loading
+├── main.ts                 # Hono server entrypoint and bootstrap setup
+├── db/                     # Database setup
+│   ├── client.ts           # Postgres-js connection pool initialization
+│   ├── schema.ts           # Single combined schema file for all SQL tables
+│   └── migrate.ts          # Programmatic migration execution runner
+├── routes/                 # Consolidated endpoint routers
+│   ├── auth.ts             # Registration, login, logout, and token rotation
+│   ├── users.ts            # Public profiles and private settings endpoints
+│   ├── posts.ts            # Blog post CRUD (with direct author profile joins)
+│   ├── comments.ts         # Hierarchical comments list and toggle likes
+│   └── health.ts           # Server liveness and database readiness checks
+├── middleware/             # Request lifecycle handlers
+│   └── index.ts            # Logging, error formatting, and JWT authentication middleware
+└── utils/                  # Helper utilities
+    ├── auth.ts             # Bcrypt hashing and jsonwebtoken verification
+    ├── response.ts         # Standard API success/error formatter helpers
+    ├── validation.ts       # Zod schemas and validation parser
+    ├── slug.ts             # SEO slug creator
+    └── pagination.ts       # Base64 cursor-based pagination encoder/decoder
+migrations/                 # Auto-generated Drizzle Kit SQL migrations
+docker-compose.yml          # Local PostgreSQL docker environment configuration
+tsconfig.json               # TypeScript compiler config
+package.json                # Single root package manifest
 ```
 
 ---
 
-# 🧩 Applications
-
-## `auth-service`
-
-Authentication and session management service.
-
-Responsibilities:
-
-* User registration
-* Login/logout
-* JWT issuance
-* Refresh token rotation
-* Session management
-* Health endpoints
-* Swagger/OpenAPI documentation
-
-Status: ✅ In Active Development
-
----
-
-## `api-gateway`
-
-Edge routing and centralized request handling.
-
-Planned responsibilities:
-
-* Reverse proxy
-* JWT validation
-* RBAC enforcement
-* Rate limiting
-* OpenAPI aggregation
-
-Status: 🚧 Planned
-
----
-
-## `blog-service`
-
-Blog content domain.
-
-Planned responsibilities:
-
-* Blog CRUD
-* Draft/publish workflows
-* Tag/category management
-* Cursor pagination
-* Search
-
-Status: 🚧 Planned
-
----
-
-## `interaction-service`
-
-User interaction domain.
-
-Planned responsibilities:
-
-* Comments
-* Likes
-* Reactions
-* Bookmarks
-
-Status: 🚧 Planned
-
----
-
-## `notification-service`
-
-Asynchronous notification processing.
-
-Planned responsibilities:
-
-* Email delivery
-* Event consumers
-* Retry queues
-* Dead-letter handling
-
-Status: 🚧 Planned
-
----
-
-# 🧱 Platform Packages
-
-All shared modules live under the `@platform/*` namespace.
-
----
-
-## `@platform/runtime`
-
-Lifecycle orchestration engine.
-
-Features:
-
-* Sequential startup
-* Graceful shutdown
-* Failure rollback
-* Signal handling
-* Resource state management
-
----
-
-## `@platform/http`
-
-Reusable HTTP runtime utilities.
-
-Features:
-
-* Error middleware
-* Request timing
-* Request IDs
-* Standard API responses
-* Health checks
-
----
-
-## `@platform/auth`
-
-Authentication and cryptographic utilities.
-
-Features:
-
-* JWT issuance/verification
-* Bcrypt hashing
-* Opaque refresh tokens
-* Typed token claims
-
----
-
-## `@platform/database`
-
-Database abstraction layer.
-
-Features:
-
-* Drizzle ORM integration
-* Runtime-managed PostgreSQL client
-* Domain-based schemas
-* Migrations
-
----
-
-## `@platform/redis`
-
-Redis infrastructure package.
-
-Features:
-
-* Runtime-managed Redis client
-* Cache utilities
-* Lock primitives
-* Pub/Sub foundation
-
----
-
-## `@platform/messaging`
-
-RabbitMQ abstraction layer.
-
-Features:
-
-* Publisher/consumer APIs
-* Event serialization
-* Queue topology assertion
-* Graceful consumer shutdown
-
----
-
-## `@platform/contracts`
-
-Pure TypeScript contract boundary.
-
-Features:
-
-* API request/response types
-* Domain primitives
-* Event payload contracts
-* Shared metadata
-
----
-
-## `@platform/validation`
-
-Strict request validation layer.
-
-Features:
-
-* Zod schemas
-* Typed validation helpers
-* Request parsing
-* Sanitized validation errors
-
----
-
-## `@platform/logger`
-
-Structured JSON logging system.
-
-Features:
-
-* AsyncLocalStorage request context
-* Correlation IDs
-* Redaction
-* Error serialization
-
----
-
-## `@platform/configuration`
-
-Fail-fast environment configuration.
-
-Features:
-
-* Zod-validated environment variables
-* Immutable runtime config
-* Nested dot-notation parsing
-* Secret redaction
-
----
-
-## `@platform/errors`
-
-Typed domain error hierarchy.
-
-Features:
-
-* Authentication errors
-* Authorization errors
-* Validation errors
-* Infrastructure errors
-
----
-
-## `@platform/observability`
-
-Telemetry and tracing abstractions.
-
-Features:
-
-* Trace propagation
-* Context extraction/injection
-* OpenTelemetry-ready runtime
-
----
-
-## `@platform/shared-kernel`
-
-Zero-dependency utility package.
-
-Features:
-
-* Slug generation
-* Cursor pagination
-* Date helpers
-
----
-
-# 🚀 Getting Started
-
-## Prerequisites
-
-* Node.js 20+
-* pnpm
-* PostgreSQL
-* Redis
-
----
-
-# 📥 Installation
-
+## 🚀 Getting Started
+
+### Prerequisites
+*   Node.js 20+
+*   pnpm (or npm / yarn)
+*   Docker (for running database locally)
+
+### 1. Installation
+Clone the repository and install all dependencies:
 ```bash
 git clone <repository-url>
-
 cd blog-server
-
 pnpm install
 ```
 
----
-
-# ⚙️ Environment Configuration
-
-Create a `.env` file in the project root.
-
-Example:
-
+### 2. Configure Environment Variables
+Create a `.env` file in the project root:
 ```env
-# Database
-database.url=postgresql://user:password@localhost:5432/blog_server
-
-# Redis
-redis.url=redis://localhost:6379
-
-# JWT
-jwt.secret=super_secret_key
-
-# Services
-services.auth=http://localhost:3001
+PORT=3000
+NODE_ENV=development
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/blog_server
+JWT_SECRET=super_secret_jwt_access_secret_key_minimum_32_chars
+JWT_ISSUER=blog-platform
+JWT_AUDIENCE=blog-platform-users
+ACCESS_TOKEN_TTL=15m
+REFRESH_TOKEN_TTL=7d
 ```
 
----
-
-# 🗄️ Database Setup
-
-Generate migrations:
-
+### 3. Spin Up PostgreSQL
+Launch the database container using Docker Compose:
 ```bash
-pnpm --filter @platform/database db:generate
+docker compose up -d
 ```
 
-Run migrations:
-
+### 4. Run Database Migrations
+Execute the migrations to set up the database tables and schemas:
 ```bash
-pnpm --filter @platform/database db:migrate
+npm run db:migrate
 ```
 
----
-
-# ▶️ Development
-
-Run all services:
-
+### 5. Start Development Server
+Launch the Hono server locally:
 ```bash
-pnpm turbo run dev
+npm run dev
 ```
-
-Build workspace:
-
-```bash
-pnpm turbo run build
-```
-
-Typecheck:
-
-```bash
-pnpm turbo run typecheck
-```
+The server will start listening at `http://localhost:3000`.
 
 ---
 
-# 📚 API Documentation
+## 🗃️ Development Scripts
 
-Swagger UI:
-
-```txt
-http://localhost:3001/docs
-```
-
-OpenAPI Spec:
-
-```txt
-http://localhost:3001/openapi.json
-```
+*   `npm run dev`: Launch the server in watcher development mode.
+*   `npm run build`: Compile TypeScript into the `dist/` production folder.
+*   `npm run start`: Launch the compiled production server.
+*   `npm run typecheck`: Perform static compiler typechecks.
+*   `npm run db:generate`: Scan `src/db/schema.ts` and generate new migration files.
+*   `npm run db:migrate`: Apply pending migration files to the database.
 
 ---
 
-# 🔒 Security Model
+## 🔒 REST APIs Inventory
 
-This platform follows a production-oriented authentication model.
+### A. Authentication (`/api/v1/auth`)
+*   `POST /register`: Register new user account.
+*   `POST /login`: Authenticate credentials, return access token & refresh token.
+*   `POST /refresh`: Rotate refresh token and issue new access token.
+*   `POST /logout`: Revoke active refresh token session.
 
-## Access Tokens
+### B. User Profiles (`/api/v1/users`)
+*   `GET /me`: Fetch authenticated user profile & account details.
+*   `PUT /me`: Update display name, bio, avatar, and website.
+*   `DELETE /me`: Delete account.
+*   `GET /:username`: Fetch public profile metadata by username.
 
-* Stateless JWTs
-* Explicit HS256 algorithm
-* Short-lived expiration
-* Typed claims
+### C. Blog Posts (`/api/v1/posts`)
+*   `GET /`: Fetch paginated list of published posts (supports `limit` and `cursor`).
+*   `GET /:slug`: Fetch single blog post by unique slug (includes author profile).
+*   `POST /`: Create blog post (Draft status).
+*   `PUT /:id`: Update blog post title or content.
+*   `POST /:id/publish`: Change status to Published and trigger in-process notification.
+*   `DELETE /:id`: Delete blog post.
 
-## Refresh Tokens
+### D. Comments & Likes (`/api/v1/posts/:postId`)
+*   `GET /comments`: Fetch post comment list (includes user author profiles).
+*   `POST /comments`: Add comment or reply.
+*   `POST /like`: Toggle post like status.
 
-* Opaque random tokens
-* Stored hashed in PostgreSQL
-* Revocable
-* Rotatable
-* Session-safe
-
-## Passwords
-
-* Bcrypt hashing
-* 12 rounds
-* No plaintext storage
-
----
-
-# 🧠 Engineering Principles
-
----
-
-## Strict Type Safety
-
-Enabled globally:
-
-```json
-"strict": true,
-"noUncheckedIndexedAccess": true,
-"exactOptionalPropertyTypes": true
-```
-
-The `any` type is forbidden.
+### E. Health checks (`/health`)
+*   `GET /live`: Hono process liveness check.
+*   `GET /ready`: Database connectivity check.
 
 ---
 
-## Contract-First Development
-
-All APIs are defined through shared contracts and validation schemas before implementation.
-
----
-
-## Infrastructure Isolation
-
-Apps never directly touch infrastructure libraries.
-
-Example:
-
-* Services never import `amqplib`
-* Services never import raw `postgres`
-* Services never import raw `ioredis`
-
-Everything passes through `@platform/*` boundaries.
-
----
-
-## Runtime Lifecycle Management
-
-Infrastructure resources are treated as managed runtime dependencies.
-
-The lifecycle manager handles:
-
-* startup ordering
-* shutdown sequencing
-* rollback on failure
-* signal handling
-
----
-
-# 🧪 Current Platform Status
-
-| Component                | Status         |
-| ------------------------ | -------------- |
-| Runtime System           | ✅ Complete     |
-| Database Layer           | ✅ Complete     |
-| HTTP Runtime             | ✅ Complete     |
-| Auth Package             | ✅ Complete     |
-| Validation Layer         | ✅ Complete     |
-| Messaging Layer          | ✅ Complete     |
-| Redis Runtime            | ✅ Complete     |
-| Observability Foundation | ✅ Complete     |
-| Auth Service             | 🚧 In Progress |
-| API Gateway              | 🚧 Planned     |
-| Blog Service             | 🚧 Planned     |
-| Interaction Service      | 🚧 Planned     |
-| Notification Service     | 🚧 Planned     |
-
----
-
-# ⚠️ Known Technical Debt
-
-Current known issues being addressed:
-
-* Refresh token lookup optimization
-* Rate limiting implementation
-* Migration automation
-* Full OpenTelemetry integration
-* Automated testing coverage
-
----
-
-# 🛠️ Planned Features
-
-## Phase 2
-
-* User service
-* Blog service
-* Interaction service
-* Notification service
-
-## Phase 3
-
-* Redis rate limiting
-* RabbitMQ integration
-* Token blacklisting
-
-## Phase 4
-
-* API Gateway
-* RBAC middleware
-* Request aggregation
-
-## Phase 5
-
-* Full observability stack
-* Grafana dashboards
-* Loki logging
-* Tempo tracing
-
-## Phase 6
-
-* Docker production deployment
-* GitHub Actions CI/CD
-* Multi-stage builds
-
-## Phase 7
-
-* Unit testing
-* Integration testing
-* E2E testing
-* Load testing
-
----
-
-# 🤝 Contribution Rules
-
-This repository enforces strict engineering conventions.
-
----
-
-## Naming Conventions
-
-| Type             | Convention |
-| ---------------- | ---------- |
-| Files            | kebab-case |
-| Variables        | camelCase  |
-| Types/Classes    | PascalCase |
-| Database Columns | snake_case |
-
----
-
-## Import Rules
-
-All local imports must include `.js` extensions.
-
-Example:
-
-```ts
-import { config } from './config.js';
-```
-
----
-
-## Commit Convention
-
-Conventional commits are required.
-
-Examples:
-
-```txt
-feat(auth): add refresh token rotation
-fix(database): resolve transaction leak
-refactor(runtime): simplify shutdown orchestration
-docs(readme): update setup instructions
-```
-
----
-
-# 📌 Important Notes
-
-* No frontend exists in this repository.
-* APIs are consumed via Swagger/OpenAPI.
-* This platform is intentionally backend-focused.
-* Architectural boundaries are strict and intentional.
-
----
-
-# 📄 License
-
-MIT License
-
----
-
-# 👨‍💻 Engineer
-
-Built and maintained by Gourab.
-
-Focused on backend engineering, distributed systems, runtime architecture, and production-grade infrastructure design.
+## 📄 License
+MIT
