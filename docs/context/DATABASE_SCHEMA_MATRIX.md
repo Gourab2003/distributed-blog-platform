@@ -1,34 +1,34 @@
-# DATABASE SCHEMA MATRIX & TABLE OWNERSHIP SPECIFICATIONS
+# DATABASE SCHEMA MATRIX & SPECIFICATIONS
 
 ## 1. Single PostgreSQL Instance Architecture
-The platform operates on a single PostgreSQL database instance managed via **Drizzle ORM** in `@platform/database`.
+The platform operates on a single PostgreSQL database instance managed via **Drizzle ORM** from `src/db/client.ts`.
 
 - **Database Name**: `blog_server`
 - **ORM**: Drizzle ORM (`drizzle-orm/pg-core`)
-- **Schema Location**: `packages/database/src/schema/`
-- **Migration Location**: `packages/database/migrations/`
+- **Schema Location**: `src/db/schema.ts`
+- **Migration Location**: `migrations/`
 
 ---
 
-## 2. Service Table Ownership Matrix
+## 2. Table Specifications & Relations
 
-> [!IMPORTANT]
-> **Strict Domain Partitioning Rule**: Each table in PostgreSQL is owned exclusively by ONE microservice. No service may read, write, or join tables owned by another service. Cross-service data fetching MUST occur via HTTP REST APIs or asynchronous RabbitMQ events.
+All tables reside in the same PostgreSQL schema. Referential integrity is strictly enforced at the database level using foreign keys.
 
-| Microservice | Owned Schema Directory | Database Tables | Foreign Key Dependencies | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| `auth-service` | `schema/auth` | `refresh_token` | References `users.id` (Soft FK / Managed) | Session management, opaque token hashes & revocation |
-| `user-service` | `schema/users` | `users`, `user_profiles` | None | User accounts, credentials, roles, profiles & settings |
-| `blog-service` | `schema/blogs` | `posts`, `categories`, `post_tags` | Stores `author_id` (UUID references `users.id`) | Blog posts, draft/published workflows, slugs |
-| `interaction-service` | `schema/interactions` | `comments`, `likes`, `bookmarks` | Stores `user_id`, `post_id` | User social interactions, comments tree, post likes |
-| `notification-service` | `schema/notifications` | `notifications`, `email_logs` | Stores `user_id` | User notifications, delivery status & retry logs |
+| Table Name | Description | Key Foreign Keys / Indexes |
+| :--- | :--- | :--- |
+| `users` | User accounts, credentials, role definitions, status | None |
+| `user_profiles` | User profile meta details (bio, avatar, displayName) | `user_id` references `users.id` (Cascade) |
+| `refresh_token` | Revocable session refresh hashes | `user_id` references `users.id` (Cascade), index on `user_id`, `is_revoked` |
+| `posts` | Blog articles, publication status, slugs | `author_id` references `users.id` (Cascade), index on `author_id`, `slug` |
+| `comments` | User comment hierarchy on posts | `post_id` references `posts.id` (Cascade), `user_id` references `users.id` (Cascade) |
+| `likes` | Post likes toggle tracker | `post_id` references `posts.id` (Cascade), `user_id` references `users.id` (Cascade), unique(`post_id`, `user_id`) |
+| `notifications` | In-app user notifications history logs | `user_id` references `users.id` (Cascade) |
 
 ---
 
-## 3. Table Schema Definitions & Indexes
+## 3. Core Database Schema Definitions (SQL equivalent)
 
-### A. `users` Table (`schema/users/users.table.ts`)
-Owned by: **`user-service`** / **`auth-service`** (auth credential read)
+### A. `users` Table
 ```sql
 CREATE TYPE user_role AS ENUM ('admin', 'author', 'user');
 
@@ -45,32 +45,13 @@ CREATE TABLE users (
 );
 ```
 
-### B. `refresh_token` Table (`schema/auth/refresh-tokens.table.ts`)
-Owned by: **`auth-service`**
-```sql
-CREATE TABLE refresh_token (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    token_hash TEXT NOT NULL,
-    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
-    revoked_at TIMESTAMP WITH TIME ZONE,
-    is_revoked BOOLEAN NOT NULL DEFAULT false,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX refresh_token_user_id_idx ON refresh_token(user_id);
-CREATE INDEX refresh_token_is_revoked_idx ON refresh_token(is_revoked);
-```
-
-### C. `posts` Table (`schema/blogs/posts.table.ts`)
-Owned by: **`blog-service`**
+### B. `posts` Table
 ```sql
 CREATE TYPE blog_post_status AS ENUM ('draft', 'published', 'archived');
 
 CREATE TABLE posts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    author_id UUID NOT NULL, -- Logical reference to users.id
+    author_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     title VARCHAR(255) NOT NULL,
     slug VARCHAR(255) NOT NULL UNIQUE,
     content TEXT NOT NULL,
@@ -79,18 +60,16 @@ CREATE TABLE posts (
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-
-CREATE INDEX posts_author_id_idx ON posts(author_id);
-CREATE INDEX posts_slug_idx ON posts(slug);
 ```
 
 ---
 
 ## 4. Drizzle Migration Commands
-```bash
-# Generate Drizzle migration files
-pnpm --filter @platform/database db:generate
 
-# Execute pending database migrations
-pnpm --filter @platform/database db:migrate
+```bash
+# Generate Drizzle migration files after editing src/db/schema.ts
+npm run db:generate
+
+# Execute pending database migrations against database URL in .env
+npm run db:migrate
 ```

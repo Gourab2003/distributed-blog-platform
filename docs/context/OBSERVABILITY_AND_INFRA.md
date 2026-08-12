@@ -1,7 +1,7 @@
 # OBSERVABILITY & INFRASTRUCTURE SPECIFICATIONS
 
 ## 1. Overview
-The platform incorporates production-grade observability across structured logging, distributed tracing, metric collection, and edge routing.
+The platform enforces production-grade logging, error isolation, and operational health checks, simplified to run as a unified monolithic container or process.
 
 ---
 
@@ -12,47 +12,25 @@ The platform incorporates production-grade observability across structured loggi
        │
        ▼
  ┌───────────┐
- │   Nginx   │ (Reverse Proxy / Rate Limiting)
+ │   Hono    │ (Structured stdout/stderr JSON Logs)
+ │ Monolith  │
  └─────┬─────┘
        │
        ▼
- ┌───────────┐     Trace Context (W3C TraceParent Header)
- │api-gateway│ ────────────────────────────────────────┐
- └─────┬─────┘                                         │
-       │                                               ▼
-       ├───► [ auth-service ] ─────────► [ PostgreSQL / Redis ]
-       │                                               │
-       ├───► [ blog-service ] ─────────► [ RabbitMQ ]  │ Logs / Traces / Metrics
-       │                                        │      │
-       └───► [ notification-service ] ◄─────────┘      │
-                                                       ▼
- ┌────────────────────────────────────────────────────────┐
- │           Observability Collectors & Storage           │
- │  • Loki (Logs)  • Tempo (Traces)  • Prometheus (Metrics)│
- └──────────────────────────┬─────────────────────────────┘
-                            ▼
-                   ┌─────────────────┐
-                   │Grafana Dashboard│
-                   └─────────────────┘
+ ┌───────────┐
+ │PostgreSQL │ (Unified Database Storage)
+ └───────────┘
 ```
 
 ---
 
-## 3. Component Telemetry Specifications
+## 3. Telemetry Specifications
 
-### A. Structured Logging (`@platform/logger`)
-- **Engine**: Winston with JSON formatting.
-- **Context Tracking**: Powered by Node.js `AsyncLocalStorage`. Automatically injects `correlationId`, `requestId`, `serviceName`, and `environment` into every log entry.
-- **Log Aggregator**: Scraped by Grafana Loki from stdout/stderr.
+### A. Structured Logging
+- **Engine**: Node.js `console.log` and `console.error` writing structured JSON directly to standard output/error.
+- **Context Injection**: Each JSON log automatically includes `requestId`, `method`, `path`, and operation `durationMs` extracted by the Hono middleware.
+- **Log Aggregator**: Standard container log collectors (like Grafana Loki, FluentBit, or AWS CloudWatch) scrape stdout/stderr stream directly.
 
-### B. Distributed Tracing (`@platform/observability`)
-- **Engine**: OpenTelemetry Node SDK.
-- **Trace Propagation**: W3C `traceparent` HTTP headers & AMQP message properties across service boundaries.
-- **Trace Collector**: Grafana Tempo listening on gRPC/HTTP OTLP endpoints.
-
-### C. Metric Collection
-- **Engine**: Prometheus Client.
-- **Scrape Endpoints**: Standard `/metrics` route exported by HTTP runtime services.
-
-### D. Reverse Proxy Edge Routing (`infra/nginx`)
-- Centralized SSL termination, path-based routing (`/api/v1/auth`, `/api/v1/posts`), and connection rate limiting.
+### B. Health Probes
+- **Liveness Probe (`GET /health/live`)**: Simple probe returning process status to the container manager (Kubernetes / ECS).
+- **Readiness Probe (`GET /health/ready`)**: Probe checking connection health by executing a ping against PostgreSQL before returning `200 OK`.

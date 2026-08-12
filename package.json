@@ -1,25 +1,39 @@
 {
   "name": "blog-server",
-  "private":"true",
-  "packageManager": "pnpm@11.2.2",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "private": true,
   "type": "module",
+  "version": "1.0.0",
+  "description": "Simplified Monolithic Blogging Platform API Server",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/src/main.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "db:generate": "drizzle-kit generate:pg",
+    "db:migrate": "tsx src/db/migrate.ts",
+    "db:studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
+    "drizzle-orm": "^0.29.3",
+    "hono": "^4.6.10",
+    "@hono/node-server": "^1.13.7",
+    "jsonwebtoken": "^9.0.2",
+    "postgres": "^3.4.3",
+    "zod": "^3.23.8"
+  },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.5",
     "@types/node": "^25.9.1",
     "@typescript-eslint/eslint-plugin": "^8.59.4",
     "@typescript-eslint/parser": "^8.59.4",
+    "drizzle-kit": "^0.20.14",
     "eslint": "^10.4.0",
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.8.3",
-    "turbo": "^2.9.14",
+    "tsx": "^4.19.2",
     "typescript": "^6.0.3"
   }
 }

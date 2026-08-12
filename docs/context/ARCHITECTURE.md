@@ -1,58 +1,54 @@
-# GLOBAL SYSTEM ARCHITECTURE & MONOREPO LAYOUT
+# GLOBAL SYSTEM ARCHITECTURE & PLATFORM LAYOUT
 
 ## 1. Executive Summary
-This enterprise backend platform is built using a **decoupled microservice architecture** within a Turborepo + PNPM workspace monorepo. It enforces strict separation of concerns, contract-first API design, runtime lifecycle management, and typed infrastructure boundaries.
+This enterprise backend platform is built using a **unified monolithic architecture** using the Hono framework and Node.js runtime. It enforces clean separation of concerns using logical directory partitioning, validated environment configuration, a unified PostgreSQL database managed by Drizzle ORM, and request correlation tracing.
 
 ---
 
-## 2. Monorepo Structure & Workspace Topology
+## 2. Directory Structure & Layout
 
 ```
 blog-server/
-├── apps/                         # Independent microservice applications
-│   ├── api-gateway/              # Edge reverse proxy, JWT validation, rate limiting
-│   ├── auth-service/             # Auth, sessions, JWT & refresh token rotation
-│   ├── blog-service/             # Article CRUD, draft/publish flows, slug management
-│   ├── interaction-service/      # Comments, likes, reactions, bookmarks
-│   ├── notification-service/     # RabbitMQ consumers, email, retries, dead-letter queues
-│   └── user-service/             # User profiles, user settings, roles
-├── packages/                     # Shared platform infrastructure libraries (@platform/*)
-│   ├── auth/                     # JWT issuance & bcrypt hashing primitives
-│   ├── configuration/            # Fail-fast Zod environment config validation
-│   ├── contracts/                # Pure TypeScript API request/response & event contracts
-│   ├── database/                 # Drizzle ORM PostgreSQL abstractions & migrations
-│   ├── errors/                   # Unified AppError hierarchy & HTTP status mappings
-│   ├── http/                     # Hono HTTP server utilities & middleware
-│   ├── logger/                   # Winston + AsyncLocalStorage request context logging
-│   ├── messaging/                # RabbitMQ AMQP publisher/consumer engine
-│   ├── observability/            # OpenTelemetry tracing & metric collection
-│   ├── redis/                    # ioredis client runtime & distributed locking
-│   ├── runtime/                  # Application lifecycle engine & signal handlers
-│   ├── shared-kernel/            # Utilities (slug generator, cursor pagination)
-│   └── validation/               # Zod request parser & schema validation helpers
-└── infra/                        # Observability & gateway container configurations
-    ├── grafana/                  # Metrics dashboards
-    ├── loki/                     # Log aggregation targets
-    ├── nginx/                    # Edge reverse proxy configs
-    ├── prometheus/               # Metric collection rules
-    └── tempo/                    # Distributed trace collector
+├── src/
+│   ├── config.ts               # Environment configuration and Zod validation
+│   ├── main.ts                 # Hono server entrypoint and bootstrap logic
+│   ├── db/                     # Drizzle ORM PostgreSQL connection and schema
+│   │   ├── client.ts           # Postgres-js connection pool initialization
+│   │   ├── schema.ts           # Combined database tables (users, posts, comments, likes, notifications)
+│   │   └── migrate.ts          # Programmatic migration execution script
+│   ├── routes/                 # Consolidated REST API endpoints
+│   │   ├── auth.ts             # User registration, login, logout, and token rotation
+│   │   ├── users.ts            # Public/private user profile management
+│   │   ├── posts.ts            # Blog post CRUD (with direct author profile SQL joins)
+│   │   ├── comments.ts         # Post comment hierarchy and likes toggling
+│   │   └── health.ts           # Server liveness and readiness probes
+│   ├── middleware/             # Request lifecycle handlers
+│   │   └── index.ts            # Timing tracking, correlation IDs, custom error serialization, and JWT auth
+│   └── utils/                  # Utility helpers
+│       ├── auth.ts             # Cryptographic helpers (bcrypt, jsonwebtoken verification)
+│       ├── response.ts         # Unified success/error JSON formatters
+│       ├── slug.ts             # SEO url slug generator
+│       └── pagination.ts       # Cursor-based pagination encoders
+├── migrations/                 # Drizzle kit auto-generated SQL migrations
+├── tsconfig.json               # Simplified TS compiler options
+├── drizzle.config.ts           # Single database migration kit configuration
+└── package.json                # Single package dependency manifest
 ```
 
 ---
 
 ## 3. Core Architectural Principles & Boundaries
 
-### A. Infrastructure Isolation Layer
-Microservices in `apps/*` MUST NEVER directly import low-level infrastructure drivers (such as `pg`, `ioredis`, `amqplib`, or `winston`). All infrastructure access is strictly encapsulated behind `@platform/*` abstractions.
+### A. Modular Structure
+While the platform runs as a single monolithic process, codebase concerns are modularly partitioned by directories under `src/routes/` and `src/utils/` to ensure readability and maintainable code boundaries.
 
-### B. Managed Runtime Lifecycle Engine
-Each microservice is bootstrapped using `@platform/runtime` lifecycle orchestration.
-- **Sequential Startup**: Database Connection -> Redis Connection -> Messaging Topology -> HTTP Server.
-- **Graceful Shutdown**: SIGINT / SIGTERM signals trigger reverse-order termination with configurable timeouts and rollback on failure.
+### B. Single Database Instance with Direct SQL Joins
+All tables reside in a single PostgreSQL database. Unlike the previous microservices setup, direct SQL joins are fully supported and encouraged for high-performance reading (e.g., joining posts with author user profiles when rendering the main feed).
 
-### C. Contract-First API & Event Schema Design
-- REST API contracts are defined in `@platform/contracts/api/v1/*` using TypeScript types and validated with Zod schemas from `@platform/validation`.
-- Event payloads are published to RabbitMQ exchanges following immutable interfaces in `@platform/contracts/events/v1/*`.
+### C. Unified Contract Validation
+HTTP REST API request validation is enforced directly at the routing layer using Zod schema structures located in `src/utils/validation.ts`.
 
-### D. Single Database Instance with Strict Domain Schemas
-A single PostgreSQL instance is shared across services, but table access is partitioned strictly by domain ownership in `@platform/database/src/schema/*`. Cross-domain SQL joins are strictly forbidden.
+### D. Simplified Operational Pipeline
+By removing the API gateway proxy and RabbitMQ message broker, operational complexity is minimized:
+- Network hops are reduced to zero for internal communications.
+- Process initialization and lifecycle management are simplified to standard node execution without Turborepo workspace linking.

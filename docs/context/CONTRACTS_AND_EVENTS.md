@@ -1,39 +1,35 @@
 # API & EVENT CONTRACT STANDARDS
 
 ## 1. Executive Summary
-Contract-First engineering ensures strict synchronization between microservices. All HTTP REST request/response interfaces and RabbitMQ event message payloads are defined as pure TypeScript interfaces in `@platform/contracts` and validated via Zod schemas in `@platform/validation`.
+Request inputs are validated at the routing boundary using Zod schemas located in `src/utils/validation.ts`. Standard success and error responses are formatted using helper utilities in `src/utils/response.ts` to ensure consistent payloads. Asynchronous event brokers (like RabbitMQ) have been eliminated; all side effects (such as notification logs) are processed in-process within their respective route handlers.
 
 ---
 
-## 2. HTTP REST Contract Standards (`@platform/contracts/api/v1/*`)
+## 2. API Contract Formatting Standard
 
-### Standard Success Response Format
-All HTTP endpoints return responses structured via the `@platform/http` response formatter:
+### Success Response Format
+All successful REST endpoints wrap their data payload like so:
 ```json
 {
   "success": true,
   "data": { ... },
   "meta": {
-    "requestId": "req_c9a18f23",
+    "requestId": "req_84a1d2f9",
     "timestamp": "2026-08-12T13:47:34.000Z",
-    "pagination": {
-      "nextCursor": "eyJpZCI6IjEyMyJ9",
-      "hasMore": true
-    }
+    "durationMs": 15
   }
 }
 ```
 
-### Standard Error Response Format
+### Error Response Format
+All errors (including validation, auth, and infrastructure failures) return a standard error body:
 ```json
 {
   "success": false,
   "error": {
     "code": "RESOURCE_NOT_FOUND",
-    "message": "Blog post with ID '123' does not exist.",
-    "details": [],
-    "requestId": "req_c9a18f23",
-    "timestamp": "2026-08-12T13:47:34.000Z"
+    "message": "Blog post with slug 'hello-world' does not exist.",
+    "requestId": "req_84a1d2f9"
   }
 }
 ```
@@ -42,37 +38,33 @@ All HTTP endpoints return responses structured via the `@platform/http` response
 
 ## 3. Core REST Endpoints Inventory
 
-### A. Authentication (`auth-service`)
-- `POST /api/v1/auth/register`: Register new user account.
-- `POST /api/v1/auth/login`: Authenticate email/password, return access token & refresh token.
-- `POST /api/v1/auth/refresh`: Rotate refresh token & issue new JWT access token.
-- `POST /api/v1/auth/logout`: Revoke active refresh token session.
-- `GET /api/v1/auth/me`: Fetch authenticated user session info.
+All routes are mounted relative to the Hono instance in `src/main.ts`.
 
-### B. Blog Posts (`blog-service`)
-- `GET /api/v1/posts`: Fetch paginated list of published blog posts.
-- `GET /api/v1/posts/:slug`: Fetch single blog post by unique slug.
-- `POST /api/v1/posts`: Create blog post (Draft status).
-- `PUT /api/v1/posts/:id`: Update blog post content or title.
-- `POST /api/v1/posts/:id/publish`: Change status to Published & trigger `blog.post.published` event.
+### A. Authentication (`/api/v1/auth`)
+- `POST /register`: Register new user account.
+- `POST /login`: Authenticate credentials, return access token & refresh token.
+- `POST /refresh`: Rotate refresh token and issue new access token.
+- `POST /logout`: Revoke active refresh token session.
 
----
+### B. User Profiles (`/api/v1/users`)
+- `GET /me`: Fetch authenticated user profile & account details.
+- `PUT /me`: Update display name, bio, avatar, and website.
+- `DELETE /me`: Delete account.
+- `GET /:username`: Fetch public profile metadata by username.
 
-## 4. RabbitMQ Event Contracts (`@platform/contracts/events/v1/*`)
+### C. Blog Posts (`/api/v1/posts`)
+- `GET /`: Fetch paginated list of published blog posts (supports `limit` and `cursor`).
+- `GET /:slug`: Fetch single blog post by unique slug (includes author profile details).
+- `POST /`: Create blog post (Draft status).
+- `PUT /:id`: Update blog post title or content.
+- `POST /:id/publish`: Change status to Published and trigger in-process notification.
+- `DELETE /:id`: Delete blog post.
 
-Events are published asynchronously via `@platform/messaging` over RabbitMQ exchanges.
+### D. Interactions (`/api/v1/posts/:postId`)
+- `GET /comments`: Fetch comments list for a post (with comment author profiles).
+- `POST /comments`: Add comment or reply.
+- `POST /like`: Toggle post like status.
 
-### User Domain Events (`user.ts`)
-| Event Name | Exchange | Routing Key | Payload Interfaces | Trigger Condition |
-| :--- | :--- | :--- | :--- | :--- |
-| `user.created` | `user.events` | `user.created` | `UserCreatedEventPayload` | User finishes registration |
-| `user.updated` | `user.events` | `user.updated` | `UserUpdatedEventPayload` | User updates profile info |
-| `user.deleted` | `user.events` | `user.deleted` | `UserDeletedEventPayload` | Account deletion |
-
-### Blog Domain Events (`blog.ts`)
-| Event Name | Exchange | Routing Key | Payload Interfaces | Trigger Condition |
-| :--- | :--- | :--- | :--- | :--- |
-| `blog.post.created` | `blog.events` | `blog.post.created` | `BlogPostCreatedEventPayload` | Post drafted |
-| `blog.post.updated` | `blog.events` | `blog.post.updated` | `BlogPostUpdatedEventPayload` | Post updated |
-| `blog.post.published` | `blog.events` | `blog.post.published` | `BlogPostPublishedEventPayload` | Post published to readers |
-| `blog.post.deleted` | `blog.events` | `blog.post.deleted` | `BlogPostDeletedEventPayload` | Post deleted |
+### E. Health Checks (`/health`)
+- `GET /live`: Hono process liveness probe.
+- `GET /ready`: Database connection connectivity readiness check.
